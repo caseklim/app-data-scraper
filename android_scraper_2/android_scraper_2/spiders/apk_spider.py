@@ -57,3 +57,4 @@ class ApkSpider(CrawlSpider):
 		item['date_published'] = datetime.strptime(date_published, '%B %d, %Y')
 
 		return item
+		
