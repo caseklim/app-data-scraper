@@ -7,29 +7,37 @@ scrapy crawl googleplay -a file_name=apk_list.txt
 
 ## Dependencies
 Before installing any of the following dependencies, update the package index
-```sudo apt-get update```
+```
+sudo apt-get update
+```
 
-Python
+**pip**
+```
+sudo apt-get install python-pip
+```
 
-pip
-```sudo apt-get install python-pip```
+**Python Requests library**
+```
+pip install requests
+```
 
-Python Requests library
-```pip install requests```
+**Scrapy**
+```
+pip install Scrapy
+```
 
-Scrapy
-```pip install Scrapy```
-
-Java
+**Java**
 ```
 sudo apt-get install openjdk-6-jre
 sudo apt-get install default-jre
 ```
 
-Google Protocol Buffers
-```sudo apt-get install protobuf-compiler libprotobuf-java```
+**Google Protocol Buffers**
+```
+sudo apt-get install protobuf-compiler libprotobuf-java
+```
 
-SBT
+**sbt**
 ```
 sudo apt-get remove scala-library scala
 wget http://www.scala-lang.org/files/archive/scala-2.11.4.deb
