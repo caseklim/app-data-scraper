@@ -21,23 +21,30 @@ class GooglePlaySpider(CrawlSpider):
 		Rule(SgmlLinkExtractor(allow=('/store/search\?.*', )), callback='parse_search', follow=True),
 	)
 
-	def __init__(self, file_name=None, *args, **kwargs):
-		super(GooglePlaySpider, self).__init__(*args, **kwargs)
-		self.file_name = file_name
-
 	def parse_category_group(self, response):
-		chars = string.ascii_uppercase + string.digits
-		for x in chars:
-			yield Request('https://play.google.com/store/search?q=' + x + '&c=apps', callback=self.parse_search)
+		sel = Selector(response)
+		category_groups = sel.xpath('//div[@class="padded-content3 app-home-nav"]')
 
-		for x in chars:
-			for y in chars:
-				yield Request('https://play.google.com/store/search?q=' + x + y + '&c=apps', callback=self.parse_search)
+		for category_group in category_groups:
+			category_group_name = category_group.xpath('h2/a/text()').extract()
 
-		for x in chars:
-			for y in chars:
-				for z in chars:
-					yield Request('https://play.google.com/store/search?q=' + x + y + z + '&c=apps', callback=self.parse_search)        
+			categories = category_group.xpath('ul/li')
+			for category in categories:
+				category_name = category.xpath('a/text()').extract()
+				category_url = category.xpath('a/@href').extract()[0]
+
+		# chars = string.ascii_uppercase + string.digits
+		# for x in chars:
+		# 	yield Request('https://play.google.com/store/search?q=' + x + '&c=apps', callback=self.parse_search)
+
+		# for x in chars:
+		# 	for y in chars:
+		# 		yield Request('https://play.google.com/store/search?q=' + x + y + '&c=apps', callback=self.parse_search)
+
+		# for x in chars:
+		# 	for y in chars:
+		# 		for z in chars:
+		# 			yield Request('https://play.google.com/store/search?q=' + x + y + z + '&c=apps', callback=self.parse_search)        
 
 		return
 
@@ -51,6 +58,7 @@ class GooglePlaySpider(CrawlSpider):
 
 			for app in apps:
 				has_app = True
+				app_name = app.xpath('text()').extract()
 				app_url = app.xpath('@href').extract()
 				yield Request('https://play.google.com' + app_url[0], callback=self.parse_app)
 
