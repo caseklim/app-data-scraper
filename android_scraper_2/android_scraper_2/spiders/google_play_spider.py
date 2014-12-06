@@ -98,13 +98,21 @@ class GooglePlaySpider(CrawlSpider):
 	def parse_app(self, response):
 		package_name = response.url[response.url.find('id=') + 3:]
 
+		# If a paid app is encountered, skip it
+		sel = Selector(response)
+		price = sel.xpath('//meta[@itemprop="price"]/@content').extract()[0]
+		if price != '0':
+			log.msg('Not a free app; skipping %s' % package_name, level=log.INFO)
+			return
+
 		try:
-			print 'Writing %s to %s...' % (package_name, self.file_name)
+			log.msg('Writing %s to %s...' % (package_name, self.file_name), level=log.INFO)
 			apk_list = open(self.file_name, 'a')
 			apk_list.write('%s\n' % package_name)
 		except IOError as e:
-			print 'I/O error({0}): {1}'.format(e.errno, e.strerror)
+			log.msg('I/O error({0}): {1}'.format(e.errno, e.strerror), level=log.ERROR)
 		else:
 			apk_list.close()
+			log.msg('Write complete! %s' % package_name, level=log.INFO)
 
 		return
