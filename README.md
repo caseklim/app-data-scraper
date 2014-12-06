@@ -6,7 +6,7 @@ android-scraper-2
 scrapy crawl googleplay -a file_name=apk_list.txt
 
 ## Dependencies
-Before installing any of the following dependencies, update the package index
+Before installing any of the following dependencies, update the package index:
 ```
 sudo apt-get update
 ```
