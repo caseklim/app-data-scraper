@@ -1,5 +1,5 @@
-com.google.android
+com.google.android.gm
 com.facebook.katana
 com.twitter.android
-com.linkedin.android
+com.instagram.android
 com.pinterest
