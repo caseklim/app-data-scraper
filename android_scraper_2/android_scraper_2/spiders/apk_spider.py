@@ -1,5 +1,6 @@
-from datetime import datetime
+import re
 import scrapy
+from datetime import datetime
 
 from scrapy import log
 from scrapy.contrib.spiders import CrawlSpider
@@ -55,6 +56,25 @@ class ApkSpider(CrawlSpider):
 		# Convert the date the APK was published from the full month, day, and year to a datetime object
 		date_published = additional_information.xpath('//div[@itemprop="datePublished"]/text()').extract()[0]
 		item['date_published'] = datetime.strptime(date_published, '%B %d, %Y')
+
+		# Collect all reviews for the current version of the app
+		item['reviews'] = []
+		single_reviews = sel.xpath('//div[@class="single-review"]')
+		for i in range(len(single_reviews)):
+			review = single_reviews[i]
+			author_url = review.xpath('//span[@class="author-name"]/a[1]/@href').extract()[i]
+			review_date = review.xpath('//span[@class="review-date"]/text()').extract()[i]
+			review_rating = review.xpath('//div[@class="review-info-star-rating"]//div[1]/@aria-label').extract()[i].strip()
+			item['reviews'].append({
+				'reviewer_id': int(author_url[author_url.find('id=') + 3:]),
+				'rating': re.search('Rated (.+?) stars out of five stars', review_rating).group(1),
+				'title': review.xpath('//span[@class="review-title"]/text()').extract()[i],
+				'body': review.xpath('//div[@class="review-body"]/text()[normalize-space(.)]').extract()[i].strip(),
+				'date': datetime.strptime(review_date, '%B %d, %Y')
+			})
+
+		# Collect all apps listed as similar to the app
+		item['similar_apps'] = sel.xpath('//div[@class="cards expandable" and preceding-sibling::h1[text() = "Similar"]]//div[@class="card no-rationale square-cover apps small"]/./@data-docid').extract()
 
 		return item
 		

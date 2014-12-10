@@ -21,3 +21,5 @@ class ApkItem(Item):
     version                 = Field() # Current version
     operating_system        = Field() # Version of Android the app is compatible with
     content_rating          = Field() # Maturity (e.g. Medium Maturity)
+    reviews                 = Field() # Reviews for the current version of the app
+    similar_apps            = Field() # Apps listed as similar to the app
