@@ -58,8 +58,7 @@ sudo apt-get install sbt
 
 **MariaDB**
 
-Instructions from here:
-
+Instructions from here:  
 https://mariadb.com/kb/en/mariadb/documentation/getting-started/binary-packages/installing-mariadb-deb-files
 ```
 sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db
