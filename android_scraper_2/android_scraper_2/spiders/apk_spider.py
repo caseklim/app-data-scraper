@@ -2,7 +2,6 @@ import re
 import scrapy
 from datetime import datetime
 
-from scrapy import log
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.selector import Selector
 
