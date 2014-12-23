@@ -55,3 +55,15 @@ sudo dpkg -i sbt-0.13.6.deb
 sudo apt-get update
 sudo apt-get install sbt
 ```
+
+**MariaDB**
+Instructions from here: https://mariadb.com/kb/en/mariadb/documentation/getting-started/binary-packages/installing-mariadb-deb-files
+```
+sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db
+
+sudo apt-get install software-properties-common 
+sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db 
+sudo add-apt-repository 'deb http://ftp.osuosl.org/pub/mariadb/repo/10.0/ubuntu trusty main'
+
+sudo apt-get install mariadb-server
+```
