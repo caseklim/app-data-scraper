@@ -70,7 +70,7 @@ class ApkSpider(CrawlSpider):
 				'rating': re.search('Rated (.+?) stars out of five stars', review_rating).group(1),
 				'title': review.xpath('//span[@class="review-title"]/text()').extract()[i],
 				'body': review.xpath('//div[@class="review-body"]/text()[normalize-space(.)]').extract()[i].strip(),
-				'date': datetime.strptime(review_date, '%B %d, %Y')
+				'review_date': datetime.strptime(review_date, '%B %d, %Y')
 			})
 
 		# Collect all apps listed as similar to the app
