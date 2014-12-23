@@ -21,6 +21,11 @@ sudo apt-get install python-pip
 pip install requests
 ```
 
+**Python MySQL Connector**
+```
+sudo pip install mysql-connector-python --allow-external mysql-connector-python
+```
+
 **Scrapy**
 ```
 pip install Scrapy

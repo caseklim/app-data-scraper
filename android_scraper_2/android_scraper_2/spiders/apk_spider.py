@@ -62,11 +62,20 @@ class ApkSpider(CrawlSpider):
 		single_reviews = sel.xpath('//div[@class="single-review"]')
 		for i in range(len(single_reviews)):
 			review = single_reviews[i]
-			author_url = review.xpath('//span[@class="author-name"]/a[1]/@href').extract()[i]
+
+			# Reviews may be anonymous and display "A Google User" instead, so we need to
+			# determine if the review has a user attached to it or not. Later, if the review
+			# is anonymous, then "None" will be assigned to the reviewer_id property.
+			author_name = review.xpath('./div[@class="review-header"]/div[@class="review-info"]/span[@class="author-name"]')
+			author = author_name.xpath('./text()').extract()[0].strip()
+			if not author:
+				author = author_name.xpath('./a[1]/@href').extract()[0]
+			print author
+			 
 			review_date = review.xpath('//span[@class="review-date"]/text()').extract()[i]
 			review_rating = review.xpath('//div[@class="review-info-star-rating"]//div[1]/@aria-label').extract()[i].strip()
 			item['reviews'].append({
-				'reviewer_id': int(author_url[author_url.find('id=') + 3:]),
+				'reviewer_id': int(author[author.find('id=') + 3:]) if author.find('id=') > -1 else None,
 				'rating': re.search('Rated (.+?) stars out of five stars', review_rating).group(1),
 				'title': review.xpath('//span[@class="review-title"]/text()').extract()[i],
 				'body': review.xpath('//div[@class="review-body"]/text()[normalize-space(.)]').extract()[i].strip(),

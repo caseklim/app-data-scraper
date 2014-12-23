@@ -15,31 +15,31 @@ class MariaDBPipeline(object):
 	# If an error occurs, the item is dropped. Otherwise, the APK and its
 	# related information were successfully inserted into the database.
 	def process_item(self, item, spider):
-        try:
-            self.insert_item(item)
-            self.insert_reviews(item['reviews'])
-            self.insert_similar_apks(item['similar_apps'])
-            self.connection.close()
-            return item
-        except mariadb.Error as e:
-        	self.connection.close()
-            raise DropItem('%s' % e.message)
+		try:
+			self.insert_item(item)
+			self.insert_reviews(item['reviews'])
+			self.insert_similar_apks(item['similar_apps'])
+			self.connection.close()
+			return item
+		except mariadb.Error as e:
+			self.connection.close()
+			raise DropItem('%s' % e.message)
 
-    # Inserts the APK into the database
-    # TODO: Need crawling_session_id
-    def insert_item(self, item):
-    	self.cursor.execute('INSERT INTO apk_information (package_name, name, developer, date_published, ' +
-	    		'genre, description, score, num_reviews, num_one_star_reviews, num_two_star_reviews, num_three_star_reviews, ' +
-	    		'num_four_star_reviews, num_five_star_reviews, whats_new, file_size, lower_installs, upper_installs, version, ' +
-	    		'operating_system, content_rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', 
-    		(item['package_name'], item['name'], item['developer'], item['date_published'], item['genre'], item['description'], 
-    			item['score'], item['num_reviews'], item['num_one_star_reviews'], item['num_two_star_reviews'], item['num_three_star_reviews'],
-    			item['num_four_star_reviews'], item['num_five_star_reviews'], item['whats_new'], item['file_size'], item['lower_installs'],
-    			item['upper_installs'], item['version'], item['operating_system'], item['content_rating']))
-    	self.connection.commit()
-    	self.new_apk_id = cursor.lastrowid
+	# Inserts the APK into the database
+	# TODO: Need crawling_session_id
+	def insert_item(self, item):
+		self.cursor.execute('INSERT INTO apk_information (package_name, name, developer, date_published, ' +
+				'genre, description, score, num_reviews, num_one_star_reviews, num_two_star_reviews, num_three_star_reviews, ' +
+				'num_four_star_reviews, num_five_star_reviews, whats_new, file_size, lower_installs, upper_installs, version, ' +
+				'operating_system, content_rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', 
+			(item['package_name'], item['name'], item['developer'], item['date_published'], item['genre'], item['description'], 
+				item['score'], item['num_reviews'], item['num_one_star_reviews'], item['num_two_star_reviews'], item['num_three_star_reviews'],
+				item['num_four_star_reviews'], item['num_five_star_reviews'], item['whats_new'], item['file_size'], item['lower_installs'],
+				item['upper_installs'], item['version'], item['operating_system'], item['content_rating']))
+		self.connection.commit()
+		self.new_apk_id = cursor.lastrowid
 
-    # Inserts the APK's reviews into the database
+	# Inserts the APK's reviews into the database
 	def insert_reviews(self, reviews):
 		for review in reviews:
 			self.cursor.execute('INSERT INTO reviews (apk_id, title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s, %s)',
@@ -49,5 +49,3 @@ class MariaDBPipeline(object):
 	def insert_similar_apks(self, similar_apps):
 		for similar_app in similar_apps:
 			self.cursor.execute('INSERT INTO similar_apks (apk_id, similar_apk) VALUES (%s, %s)', (self.new_apk_id, similar_app))
-
-	return item;
