@@ -6,6 +6,7 @@ class MariaDBPipeline(object):
 
 	# Opens the database connection
 	def __init__(self, settings):
+		self.new_apk_id = None
 		self.db_info = settings.get('MARIADB_INFO')
 		self.connection = mariadb.connect(user=db_info['user'], password=db_info['password'], database=db_info['database'])
 		self.cursor = connection.cursor()
@@ -18,11 +19,14 @@ class MariaDBPipeline(object):
             self.insert_item(item)
             self.insert_reviews(item['reviews'])
             self.insert_similar_apks(item['similar_apps'])
+            self.connection.close()
             return item
         except mariadb.Error as e:
+        	self.connection.close()
             raise DropItem('%s' % e.message)
 
     # Inserts the APK into the database
+    # TODO: Need crawling_session_id
     def insert_item(self, item):
     	self.cursor.execute('INSERT INTO apk_information (package_name, name, developer, date_published, ' +
 	    		'genre, description, score, num_reviews, num_one_star_reviews, num_two_star_reviews, num_three_star_reviews, ' +
@@ -32,18 +36,18 @@ class MariaDBPipeline(object):
     			item['score'], item['num_reviews'], item['num_one_star_reviews'], item['num_two_star_reviews'], item['num_three_star_reviews'],
     			item['num_four_star_reviews'], item['num_five_star_reviews'], item['whats_new'], item['file_size'], item['lower_installs'],
     			item['upper_installs'], item['version'], item['operating_system'], item['content_rating']))
+    	self.connection.commit()
+    	self.new_apk_id = cursor.lastrowid
 
     # Inserts the APK's reviews into the database
 	def insert_reviews(self, reviews):
-		# TODO need apk_id
 		for review in reviews:
-			self.cursor.execute('INSERT INTO reviews (title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s)',
-				(review['title'], review['body'], review['reviewer_id'], review['review_date'], review['rating']))
+			self.cursor.execute('INSERT INTO reviews (apk_id, title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s, %s)',
+				(self.new_apk_id, review['title'], review['body'], review['reviewer_id'], review['review_date'], review['rating']))
 
 	# Inserts the apps similar to the APK into the database
 	def insert_similar_apks(self, similar_apps):
-		# TODO need apk_id
 		for similar_app in similar_apps:
-			self.cursor.execute('INSERT INTO similar_apks (similar_apk) VALUES (%s)', (similar_app))
+			self.cursor.execute('INSERT INTO similar_apks (apk_id, similar_apk) VALUES (%s, %s)', (self.new_apk_id, similar_app))
 
 	return item;
