@@ -70,7 +70,6 @@ class ApkSpider(CrawlSpider):
 			author = author_name.xpath('./text()').extract()[0].strip()
 			if not author:
 				author = author_name.xpath('./a[1]/@href').extract()[0]
-			print author
 			 
 			review_date = review.xpath('//span[@class="review-date"]/text()').extract()[i]
 			review_rating = review.xpath('//div[@class="review-info-star-rating"]//div[1]/@aria-label').extract()[i].strip()
