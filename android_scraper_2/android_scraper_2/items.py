@@ -23,3 +23,6 @@ class ApkItem(Item):
     content_rating          = Field() # Maturity (e.g. Medium Maturity)
     reviews                 = Field() # Reviews for the current version of the app
     similar_apps            = Field() # Apps listed as similar to the app
+    
+    start_time              = Field() # The time at which scraping began for this Item
+    end_time                = Field() # The time at which scraping ended for this Item

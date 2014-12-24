@@ -11,13 +11,31 @@ class ApkSpider(CrawlSpider):
 	name = 'apkspider'
 	allowed_domains = ['play.google.com']
 
-	def __init__(self, package_name=None, *args, **kwargs):
+	def __init__(self, package_name=None, start_time=None, *args, **kwargs):
+		"""
+		Initializes the ApkSpider.
+
+		Args:
+			package_name: the package name of the app to collect information on
+			start_time: the time at which the scraping session started
+		"""
 		super(ApkSpider, self).__init__(*args, **kwargs)
 		self.start_urls = ['https://play.google.com/store/apps/details?id=%s' % package_name]
+		self.package_name = package_name
+		self.start_time = start_time
 
 	def parse(self, response):
+		"""
+		Parses information from Google Play on a single app using the response URL.
+
+		Args:
+			response: the HTTP response used to parse app information
+		"""
 		item = ApkItem()
 		sel = Selector(response)
+
+		# Hold on to the start time that was passed in as an argument
+		item['start_time'] = self.start_time
 
 		item['package_name'] = response.url[response.url.find('id=') + 3:]
 
@@ -82,6 +100,10 @@ class ApkSpider(CrawlSpider):
 
 		# Collect all apps listed as similar to the app
 		item['similar_apps'] = sel.xpath('//div[@class="cards expandable" and preceding-sibling::h1[text() = "Similar"]]//div[@class="card no-rationale square-cover apps small"]/./@data-docid').extract()
+
+		# Generate the time at which scraping ended for this app
+		now = datetime.now()
+		item['end_time'] = now.strftime('%m-%d-%Y %T')
 
 		return item
 		
