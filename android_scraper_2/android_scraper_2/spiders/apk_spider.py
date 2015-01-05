@@ -103,7 +103,7 @@ class ApkSpider(CrawlSpider):
 
 		# Generate the time at which scraping ended for this app
 		now = datetime.now()
-		item['end_time'] = now.strftime('%m-%d-%Y %T')
+		item['end_time'] = now.strftime('%Y-%m-%d %T')
 
 		return item
 		

@@ -18,7 +18,7 @@ SPIDER_MODULES = ['android_scraper_2.spiders']
 NEWSPIDER_MODULE = 'android_scraper_2.spiders'
 
 ITEM_PIPELINES = {
-	'android_scraper_2.pipelines.MariaDBPipeline': None
+	'android_scraper_2.pipelines.MariaDBPipeline': 100
 }
 
 DOWNLOADER_MIDDLEWARES = {
