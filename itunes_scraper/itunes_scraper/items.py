@@ -11,7 +11,7 @@ class ItunesItem(Item):
 	version						= Field() # Current version
 	file_size					= Field() # File size
 	languages					= Field() # Languages supported by the app
-	rating						= Field() # Maturity (e.g. 4+)
+	content_advisory_rating		= Field() # Maturity (e.g. 4+)
 	requirements				= Field() # Device compatibility
 	rating_current_version		= Field() # Average customer rating of the current version
 	num_ratings_current_version	= Field() # Rating count for the current version
