@@ -3,7 +3,7 @@ start_time=$( date +"%Y-%m-%d %T" )
 while read package_name
 do
 	# Collect info on the app from Google Play, and then download the respective APK
-	( cd android_scraper_2 ; scrapy crawl apkspider -a package_name="$package_name" -a start_time="$start_time" )
+	( cd android_scraper_2 ; scrapy crawl apk -a package_name="$package_name" -a start_time="$start_time" )
 	( cd google-play-crawler/googleplay ; java -jar googleplaycrawler-0.3.jar -f crawler.conf download $package_name )
 
 	# Once the APK is downloaded, move and rename the file

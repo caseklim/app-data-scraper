@@ -21,9 +21,6 @@ class ItunesSpider(CrawlSpider):
 	def parse(self, response):
 		"""
 		Traverses the iTunes App Store.
-
-		Args:
-			response: the HTTP response used to parse the page
 		"""
 		sel = Selector(response)
 
@@ -38,9 +35,6 @@ class ItunesSpider(CrawlSpider):
 	def parse_genre(self, response):
 		"""
 		Parses the page of a particular genre (e.g. Books).
-
-		Args:
-			response: the HTTP response used to parse the page
 		"""
 		sel = Selector(response)
 
@@ -61,9 +55,6 @@ class ItunesSpider(CrawlSpider):
 	def parse_letter(self, response):
 		"""
 		Parses a page of apps starting with a particular letter.
-
-		Args:
-			response: the HTTP response used to parse the page
 		"""
 		sel = Selector(response)
 
@@ -88,9 +79,6 @@ class ItunesSpider(CrawlSpider):
 	def parse_app(self, response):
 		"""
 		Parses the page of a single app.
-
-		Args:
-			response: the HTTP response used to parse the page
 		"""
 		m = re.match(r'(.*)/id(\d+)(.*)', response.url)
 		print m.group(2)

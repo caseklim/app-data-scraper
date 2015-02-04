@@ -8,7 +8,7 @@ from scrapy.selector import Selector
 from android_scraper_2.items import ApkItem
 
 class ApkSpider(CrawlSpider):
-	name = 'apkspider'
+	name = 'apk'
 	allowed_domains = ['play.google.com']
 
 	def __init__(self, package_name=None, start_time=None, *args, **kwargs):
@@ -27,9 +27,6 @@ class ApkSpider(CrawlSpider):
 	def parse(self, response):
 		"""
 		Parses information from Google Play on a single app using the response URL.
-
-		Args:
-			response: the HTTP response used to parse app information
 		"""
 		item = ApkItem()
 		sel = Selector(response)
