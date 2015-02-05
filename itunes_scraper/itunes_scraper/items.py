@@ -18,8 +18,8 @@ class ItunesItem(Item):
 	num_ratings_current_version	= Field() # Rating count for the current version
 	rating_all_versions			= Field() # Average customer rating of all versions
 	num_ratings_all_versions	= Field() # Rating count for all versions
-	customer_reviews			= Field() # Reviews for the current version of the app
 	minimum_os_version			= Field() # Minimum OS required to suppor the app
+	customer_reviews			= Field() # Reviews for the current version of the app
 
 	start_time              	= Field() # The time at which scraping began for this Item
 	end_time                	= Field() # The time at which scraping ended for this Item

@@ -39,7 +39,7 @@ class MariaDBPipeline(object):
 	# Creates a new crawling session or updates the current
 	# crawling session, if one is currently ongoing.
 	def create_or_update_crawling_session(self, item):
-		self.cursor.execute('SELECT crawling_id, start_time FROM crawling_sessions ORDER BY start_time DESC LIMIT 1')
+		self.cursor.execute('SELECT crawling_id, start_time FROM android_crawling_sessions ORDER BY start_time DESC LIMIT 1')
 		crawling_session = self.cursor.fetchone()
 
 		if crawling_session is None or (crawling_session is not None and crawling_session[1].strftime('%Y-%m-%d %H:%M:%S') != item['start_time']):
@@ -47,7 +47,7 @@ class MariaDBPipeline(object):
 			# session (i.e. the start time of the last row is not equal to the start 
 			# time for the current item), then create a new crawling session.
 			log.msg('Creating new crawling session with start time %s...' % item['start_time'], level=log.INFO)
-			self.cursor.execute('INSERT INTO crawling_sessions (start_time, end_time) VALUES (%s, %s)', (item['start_time'], item['end_time']))
+			self.cursor.execute('INSERT INTO android_crawling_sessions (start_time, end_time) VALUES (%s, %s)', (item['start_time'], item['end_time']))
 			self.connection.commit()
 			self.crawling_session_id = self.cursor.lastrowid
 			log.msg('Creation complete! crawling_id = %s' % self.crawling_session_id)
@@ -77,17 +77,17 @@ class MariaDBPipeline(object):
 
 	# Inserts the APK's reviews into the database
 	def insert_reviews(self, item):
-		log.msg('Inserting reviews for %s into reviews...' % item['package_name'], level=log.INFO)
+		log.msg('Inserting reviews for %s into android_reviews...' % item['package_name'], level=log.INFO)
 		for review in item['reviews']:
-			self.cursor.execute('INSERT INTO reviews (apk_id, title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s, %s)',
+			self.cursor.execute('INSERT INTO android_reviews (apk_id, title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s, %s)',
 				(self.new_apk_id, review['title'], review['body'], review['reviewer_id'], review['review_date'], review['rating']))
 		log.msg('Insert of reviews complete! %s' % item['package_name'], level=log.INFO)
 		self.connection.commit()
 
 	# Inserts the apps similar to the APK into the database
 	def insert_similar_apps(self, item):
-		log.msg('Inserting similar apps for %s into similar_apps...' % item['package_name'], level=log.INFO)
+		log.msg('Inserting similar apps for %s into similar_android_apps...' % item['package_name'], level=log.INFO)
 		for similar_app in item['similar_apps']:
-			self.cursor.execute('INSERT INTO similar_apps (apk_id, similar_app) VALUES (%s, %s)', (self.new_apk_id, similar_app))
+			self.cursor.execute('INSERT INTO similar_android_apps (apk_id, similar_app) VALUES (%s, %s)', (self.new_apk_id, similar_app))
 		log.msg('Insert of similar apps complete! %s' % item['package_name'], level=log.INFO)
 		self.connection.commit()

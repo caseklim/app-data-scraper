@@ -8,10 +8,31 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
 
+#--------------------
+# Scrapy Settings
+#--------------------
+
 BOT_NAME = 'itunes_scraper'
 
 SPIDER_MODULES = ['itunes_scraper.spiders']
 NEWSPIDER_MODULE = 'itunes_scraper.spiders'
 
+ITEM_PIPELINES = {
+	'android_scraper_2.pipelines.MariaDBPipeline': None
+}
+
+DOWNLOAD_DELAY = 0.25
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'itunes_scraper (+http://www.yourdomain.com)'
+# USER_AGENT = 'itunes_scraper (+http://www.yourdomain.com)'
+
+#--------------------
+# Custom Settings
+#--------------------
+
+# Information used by MariaDBPipeline to connect to a MariaDB database
+MARIADB_INFO = {
+	'user': 'root',
+	'password': 'password',
+	'database': 'android_scraper_2'
+}

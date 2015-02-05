@@ -31,7 +31,7 @@ class ApkSpider(CrawlSpider):
 		item = ApkItem()
 		sel = Selector(response)
 
-		# Hold on to the start time that was passed in as an argument
+		# Keep track of the start time that was passed in as an argument
 		item['start_time'] = self.start_time
 
 		item['package_name'] = response.url[response.url.find('id=') + 3:]
