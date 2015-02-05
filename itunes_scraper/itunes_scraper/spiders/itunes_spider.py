@@ -2,6 +2,7 @@ import re
 
 import scrapy
 
+from scrapy import log
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.selector import Selector
 from scrapy.http import Request
@@ -10,13 +11,8 @@ from itunes_scraper.items import ItunesItem
 
 class ItunesSpider(CrawlSpider):
 	name = 'itunes'
+	start_urls = ['https://itunes.apple.com/us/genre/ios/id36']
 	allowed_domains = ['itunes.apple.com']
-
-	def __init__(self):
-		"""
-		Initializes the iTunesSpider.
-		"""
-		self.start_urls = ['https://itunes.apple.com/us/genre/ios/id36']
 
 	def parse(self, response):
 		"""
@@ -78,7 +74,19 @@ class ItunesSpider(CrawlSpider):
 
 	def parse_app(self, response):
 		"""
-		Parses the page of a single app.
+		Writes the app ID to a file to be used by the IosSpider.
 		"""
 		m = re.match(r'(.*)/id(\d+)(.*)', response.url)
-		print m.group(2)
+		app_id = m.group(2)
+
+		try:
+			log.msg('Writing %s to %s...' % (app_id, self.file_name), level=log.INFO)
+			ios_list = open(self.file_name, 'a')
+			ios_list.write('%s\n' % app_id)
+		except IOError as e:
+			log.msg('I/O error({0}): {1}'.format(e.errno, e.strerror), level=log.ERROR)
+		else:
+			ios_list.close()
+			log.msg('Write complete! %s' % app_id, level=log.INFO)
+
+		return
