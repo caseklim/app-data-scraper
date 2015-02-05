@@ -18,7 +18,7 @@ SPIDER_MODULES = ['itunes_scraper.spiders']
 NEWSPIDER_MODULE = 'itunes_scraper.spiders'
 
 ITEM_PIPELINES = {
-	'android_scraper_2.pipelines.MariaDBPipeline': None
+	'itunes_scraper.pipelines.MariaDBPipeline': None
 }
 
 DOWNLOAD_DELAY = 0.25

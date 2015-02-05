@@ -5,7 +5,7 @@ from datetime import datetime
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.selector import Selector
 
-from android_scraper_2.items import ApkItem
+from android_scraper.items import ApkItem
 
 class ApkSpider(CrawlSpider):
 	name = 'apk'

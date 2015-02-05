@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Scrapy settings for android_scraper_2 project
+# Scrapy settings for android_scraper project
 #
 # For simplicity, this file contains only the most important settings by
 # default. All the other settings are documented here:
@@ -12,25 +12,25 @@
 # Scrapy Settings
 #--------------------
 
-BOT_NAME = 'android_scraper_2'
+BOT_NAME = 'android_scraper'
 
-SPIDER_MODULES = ['android_scraper_2.spiders']
-NEWSPIDER_MODULE = 'android_scraper_2.spiders'
+SPIDER_MODULES = ['android_scraper.spiders']
+NEWSPIDER_MODULE = 'android_scraper.spiders'
 
 ITEM_PIPELINES = {
-	'android_scraper_2.pipelines.MariaDBPipeline': None
+	'android_scraper.pipelines.MariaDBPipeline': None
 }
 
 DOWNLOADER_MIDDLEWARES = {
-	'android_scraper_2.middlewares.RandomUserAgentMiddleware': None,
-	'android_scraper_2.middlewares.ProxyMiddleware': None,
+	'android_scraper.middlewares.RandomUserAgentMiddleware': None,
+	'android_scraper.middlewares.ProxyMiddleware': None,
 	'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None
 }
 
 DOWNLOAD_DELAY = 0.25
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'android_scraper_2 (+http://www.yourdomain.com)'
+# USER_AGENT = 'android_scraper (+http://www.yourdomain.com)'
 
 #--------------------
 # Custom Settings

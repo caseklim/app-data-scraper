@@ -8,7 +8,7 @@ from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.selector import Selector
 from scrapy.http import Request
 
-from android_scraper_2.items import ApkItem
+from android_scraper.items import ApkItem
 
 class GooglePlaySpider(CrawlSpider):
 	name = 'googleplay'
