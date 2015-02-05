@@ -148,7 +148,7 @@ class IosSpider(CrawlSpider):
 			else:
 				review['user'] = user_node.text.strip()
 
-			rating_node = node.find("{http://www.apple.com/itms/}HBoxView/{http://www.apple.com/itms/}HBoxView/{http://www.apple.com/itms/}HBoxView")
+			rating_node = node.find('{http://www.apple.com/itms/}HBoxView/{http://www.apple.com/itms/}HBoxView/{http://www.apple.com/itms/}HBoxView')
 			try:
 				alt = rating_node.attrib['alt']
 				stars = int(alt.strip(' stars'))
