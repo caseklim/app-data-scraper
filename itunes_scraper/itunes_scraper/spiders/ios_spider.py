@@ -16,11 +16,14 @@ from itunes_scraper.items import ItunesItem
 class IosSpider(CrawlSpider):
 	name = 'ios'
 
-	def __init__(self):
+	def __init__(self, app_id=None, start_time=None, *args, **kwargs):
 		"""
 		Initializes the iOSSpider.
 		"""
-		self.start_urls = ['https://itunes.apple.com/us/app/id429047995']
+		super(IosSpider, self).__init__(*args, **kwargs)
+		self.start_urls = ['https://itunes.apple.com/us/app/id%s' % app_id]
+		self.app_id = app_id
+		self.start_time = start_time
 
 	def parse(self, response):
 		"""
@@ -28,6 +31,9 @@ class IosSpider(CrawlSpider):
 		"""
 		item = ItunesItem()
 		sel = Selector(response)
+
+		# Keep track of the start time that was passed in as an argument
+		item['start_time'] = self.start_time
 
 		item['id'] = response.url[response.url.find('/id') + 3:]
 
@@ -73,6 +79,10 @@ class IosSpider(CrawlSpider):
 
 			# Collect all customer reviews for the current version of the app
 			item['customer_reviews'] = self.get_reviews(143441, item['id'], item['version'])
+
+			# Generate the time at which scraping ended for this app
+			now = datetime.now()
+			item['end_time'] = now.strftime('%Y-%m-%d %T')
 
 			return item
 
