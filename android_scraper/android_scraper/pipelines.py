@@ -1,5 +1,6 @@
 from datetime import datetime
 import mysql.connector as mariadb
+import subprocess
 
 from scrapy import log
 from scrapy.exceptions import DropItem
@@ -24,13 +25,18 @@ class MariaDBPipeline(object):
 	# Inserts the APK, its reviews, and its similar apps into the database.
 	# If an error occurs, the item is dropped. Otherwise, the APK and its
 	# related information were successfully inserted into the database.
+	# If a new version of the APK exists, then the file is downloaded.
 	def process_item(self, item, spider):
 		try:
 			self.create_or_update_crawling_session(item)
 			self.insert_item(item)
 			self.insert_reviews(item)
 			self.insert_similar_apps(item)
+			subprocess.call('./android_script-2.sh "%s" "%s" "%s" "%s"' % (item['package_name'], 
+				str(item['date_published'].year), str(item['date_published'].month), str(item['date_published'].day)), shell=True)
 		except mariadb.Error as error:
+			log.msg('Error: {}'.format(error), level=log.ERROR)
+		except OSError as error:
 			log.msg('Error: {}'.format(error), level=log.ERROR)
 		finally:
 			self.connection.close()
