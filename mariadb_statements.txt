@@ -28,7 +28,8 @@ CREATE TABLE apk_information (
 	operating_system VARCHAR(255),
 	content_rating VARCHAR(255),
 	crawling_session_id INT,
-	PRIMARY KEY (apk_id, package_name, date_published),
+	PRIMARY KEY (apk_id),
+	UNIQUE (package_name, date_published),
 	FOREIGN KEY (crawling_session_id) REFERENCES android_crawling_sessions(crawling_id)
 );
 
