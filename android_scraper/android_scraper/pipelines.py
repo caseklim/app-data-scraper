@@ -60,7 +60,7 @@ class MariaDBPipeline(object):
 		else:
 			# Otherwise, update the current crawling session with the latest end time.
 			log.msg('Updating crawling session %s with end time %s...' % (crawling_session[0], item['end_time']), level=log.INFO)
-			self.cursor.execute('UPDATE crawling_sessions SET end_time = %s WHERE crawling_id = %s', (item['end_time'], crawling_session[0]))
+			self.cursor.execute('UPDATE android_crawling_sessions SET end_time = %s WHERE crawling_id = %s', (item['end_time'], crawling_session[0]))
 			self.connection.commit()
 			self.crawling_session_id = crawling_session[0]
 			log.msg('Update complete!', level=log.INFO)
