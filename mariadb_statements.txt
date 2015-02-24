@@ -1,0 +1,94 @@
+CREATE TABLE android_crawling_sessions (
+	crawling_id INT NOT NULL AUTO_INCREMENT,
+	start_time DATETIME,
+	end_time DATETIME,
+	PRIMARY KEY (crawling_id)
+);
+
+CREATE TABLE apk_information (
+	apk_id INT NOT NULL AUTO_INCREMENT,
+	package_name VARCHAR(255),
+	name VARCHAR(255),
+	developer VARCHAR(255),
+	date_published DATE,
+	genre VARCHAR(255),
+	description TEXT,
+	score FLOAT,
+	num_reviews INT,
+	num_one_star_reviews INT,
+	num_two_star_reviews INT,
+	num_three_star_reviews INT,
+	num_four_star_reviews INT,
+	num_five_star_reviews INT,
+	whats_new TEXT,
+	file_size VARCHAR(255),
+	lower_installs INT,
+	upper_installs INT,
+	version VARCHAR(255),
+	operating_system VARCHAR(255),
+	content_rating VARCHAR(255),
+	crawling_session_id INT,
+	PRIMARY KEY (apk_id, package_name, date_published),
+	FOREIGN KEY (crawling_session_id) REFERENCES android_crawling_sessions(crawling_id)
+);
+
+CREATE TABLE similar_android_apps (
+	apk_id INT,
+	similar_app VARCHAR(255),
+	FOREIGN KEY (apk_id) REFERENCES apk_information(apk_id)
+);
+
+CREATE TABLE android_reviews (
+	review_id INT NOT NULL AUTO_INCREMENT,
+	apk_id INT,
+	title VARCHAR(255),
+	body TEXT,
+	reviewer_id INT,
+	review_date DATE,
+	rating INT,
+	PRIMARY KEY (review_id),
+	FOREIGN KEY (apk_id) REFERENCES apk_information(apk_id)
+);
+
+CREATE TABLE ios_crawling_sessions (
+	crawling_id INT NOT NULL AUTO_INCREMENT,
+	start_time DATETIME,
+	end_time DATETIME,
+	PRIMARY KEY (crawling_id)
+);
+
+CREATE TABLE ios_app_information (
+	id INT NOT NULL AUTO_INCREMENT,
+	bundle_id VARCHAR(255),
+	name VARCHAR(255),
+	developer VARCHAR(255),
+	price DOUBLE,
+	description TEXT,
+	release_notes TEXT,
+	genre VARCHAR(255),
+	release_date DATE,
+	updated_date DATE,
+	version VARCHAR(255),
+	file_size VARCHAR(255),
+	content_advisory_warning VARCHAR(255),
+	rating_current_version VARCHAR(255),
+	num_ratings_current_version INT,
+	rating_all_versions VARCHAR(255),
+	num_ratings_all_versions INT,
+	minimum_os_version FLOAT,
+	crawling_session_id INT,
+	PRIMARY KEY(id),
+	FOREIGN KEY (crawling_session_id) REFERENCES ios_crawling_sessions(crawling_id)
+);
+
+CREATE TABLE ios_reviews (
+	review_id INT NOT NULL AUTO_INCREMENT,
+	app_id INT,
+	topic VARCHAR(255),
+	rating INT,
+	user VARCHAR(255),
+	review TEXT,
+	version VARCHAR(255),
+	PRIMARY KEY (review_id),
+	FOREIGN KEY (app_id) REFERENCES ios_app_information(id)
+);
