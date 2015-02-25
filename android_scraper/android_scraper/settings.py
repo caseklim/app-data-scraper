@@ -38,9 +38,9 @@ DOWNLOAD_DELAY = 0.25
 
 # Information used by MariaDBPipeline to connect to a MariaDB database
 MARIADB_INFO = {
-	'user': 'root',
-	'password': 'password',
-	'database': 'android_scraper_2'
+	'user': 'AppDataDBUser',
+	'password': '7Rk5qx5k5AT7B0bNQD843pWNuADkKt4jQSnyAI8DNpjjgLlUamlGAgtMrzzK0Xu',
+	'database': 'AppDataDB'
 }
 
 # Proxies (e.g. http://123.45.67.89:8080) need to be from the USA in order to gather data in English

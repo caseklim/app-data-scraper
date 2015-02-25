@@ -3,3 +3,14 @@ com.facebook.katana
 com.twitter.android
 com.snapchat.android
 com.pinterest
+com.yelp.android
+com.linkedin.android
+com.joelapenna.foursquared
+com.facebook.orca
+com.trello
+com.dropbox.android
+com.spotify.music
+com.instagram.android
+com.pandora.android
+com.netflix.mediaclient
+com.skype.raider
