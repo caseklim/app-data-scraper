@@ -60,8 +60,8 @@ class MariaDBPipeline(object):
 
 	# Inserts the APK into the database
 	def insert_item(self, item):
-		log.msg('Inserting %s into ios_information...' % item['id'], level=log.INFO)
-		self.cursor.execute('INSERT INTO ios_information (id, bundle_id, name, developer, ' +
+		log.msg('Inserting %s into ios_app_information...' % item['id'], level=log.INFO)
+		self.cursor.execute('INSERT INTO ios_app_information (id, bundle_id, name, developer, ' +
 				'price, description, release_notes, genre, release_date, updated_date, version, ' +
 				'file_size, content_advisory_rating, rating_current_version, num_ratings_current_version, ' +
 				'rating_all_versions, num_ratings_all_versions, minimum_os_version, crawling_session_id) ' +
