@@ -26,6 +26,11 @@ pip install requests
 sudo pip install mysql-connector-python --allow-external mysql-connector-python
 ```
 
+**Python ElementTree**
+```
+sudo easy_install elementtree
+```
+
 **Scrapy**
 ```
 pip install Scrapy
