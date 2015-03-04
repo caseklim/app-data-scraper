@@ -79,7 +79,7 @@ CREATE TABLE ios_app_information (
 	minimum_os_version FLOAT,
 	crawling_session_id INT,
 	PRIMARY KEY(id),
-	UNIQUE (bundle_id),
+	UNIQUE (bundle_id, updated_date),
 	FOREIGN KEY (crawling_session_id) REFERENCES ios_crawling_sessions(crawling_id)
 );
 
