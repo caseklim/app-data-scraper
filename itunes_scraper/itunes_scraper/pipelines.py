@@ -21,12 +21,15 @@ class MariaDBPipeline(object):
 	def from_crawler(cls, crawler):
 		return cls(crawler.settings)
 
-	# Inserts the app and its reviews into the database.
-	# If an error occurs, the item is dropped. Otherwise, the app and its
-	# related information were successfully inserted into the database.
+	# Inserts the app, its reviews, and its similar apps into the database.
+	# If an error occurs, the item and its respective information is not
+	# inserted into the database.
 	def process_item(self, item, spider):
 		try:
+			# Create a new crawling session, or update the existing one
 			self.create_or_update_crawling_session(item)
+
+			# Insert the app information and reviews into the database
 			self.insert_item(item)
 			self.insert_reviews(item)
 		except mariadb.Error as error:
