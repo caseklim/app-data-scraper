@@ -44,7 +44,7 @@ CREATE TABLE android_reviews (
 	apk_id INT,
 	title VARCHAR(255),
 	body TEXT,
-	reviewer_id INT,
+	reviewer_id BIGINT,
 	review_date DATE,
 	rating INT,
 	PRIMARY KEY (review_id),
@@ -59,7 +59,8 @@ CREATE TABLE ios_crawling_sessions (
 );
 
 CREATE TABLE ios_app_information (
-	id INT NOT NULL AUTO_INCREMENT,
+	app_id INT NOT NULL AUTO_INCREMENT,
+	id INT,
 	bundle_id VARCHAR(255),
 	name VARCHAR(255),
 	developer VARCHAR(255),
@@ -92,5 +93,5 @@ CREATE TABLE ios_reviews (
 	review TEXT,
 	version VARCHAR(255),
 	PRIMARY KEY (review_id),
-	FOREIGN KEY (app_id) REFERENCES ios_app_information(id)
+	FOREIGN KEY (app_id) REFERENCES ios_app_information(app_id)
 );
