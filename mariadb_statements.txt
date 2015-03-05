@@ -44,7 +44,7 @@ CREATE TABLE android_reviews (
 	apk_id INT,
 	title VARCHAR(255),
 	body TEXT,
-	reviewer_id BIGINT,
+	reviewer_id VARCHAR(255),
 	review_date DATE,
 	rating INT,
 	PRIMARY KEY (review_id),
