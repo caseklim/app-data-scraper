@@ -103,7 +103,7 @@ class ApkSpider(CrawlSpider):
 			})
 
 		# Collect all apps listed as similar to the app
-		item['similar_apps'] = sel.xpath('//div[@class="cards expandable" and preceding-sibling::h1[text() = "Similar"]]//div[@class="card no-rationale square-cover apps small"]/./@data-docid').extract()
+		item['similar_apps'] = sel.xpath('//div[@class="rec-cluster"][1]//div[@class="card no-rationale square-cover apps small"]/./@data-docid').extract()
 
 		# Generate the time at which scraping ended for this app
 		now = datetime.now()
