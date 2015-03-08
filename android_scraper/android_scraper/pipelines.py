@@ -41,18 +41,24 @@ class MariaDBPipeline(object):
 			# Create a new crawling session, or update the existing one
 			self.create_or_update_crawling_session(item)
 
-		if self.apk_exists(item['package_name'], item['date_published']):
-			# If the app has not been updated since the last crawling session, only update its reviews
-			self.insert_reviews(item)
-		else:
-			# Insert the APK information, reviews, and similar apps into the database
-			self.insert_item(item)
-			self.insert_reviews(item)
-			self.insert_similar_apps(item)
+			# Determine whether an APK with the specified package name published on the specified date already exists in the database
+			date_published datetime.strftime(item['date_published'], '%Y-%m-%d')
+			self.cursor.execute('SELECT package_name, date_published FROM apk_information WHERE package_name="%s" AND date_published="%s"', 
+				(item['package_name'], datetime.strftime(item['date_published'], '%Y-%m-%d')))
+			apk = self.cursor.fetchone()
 
-			# If a new version exists, call the Bash shell script that downloads the respective APK file
-			subprocess.call('./android_script-2.sh "%s" "%s" "%s" "%s"' % (item['package_name'], 
-				str(item['date_published'].year), str(item['date_published'].month), str(item['date_published'].day)), shell=True)
+			if apk is None:
+				# Insert the APK information, reviews, and similar apps into the database
+				self.insert_item(item)
+				self.insert_reviews(item)
+				self.insert_similar_apps(item)
+			else:
+				# If the app has not been updated since the last crawling session, only update its reviews
+				self.insert_reviews(item)
+
+				# If a new version exists, call the Bash shell script that downloads the respective APK file
+				subprocess.call('./android_script-2.sh "%s" "%s" "%s" "%s"' % (item['package_name'], 
+					str(item['date_published'].year), str(item['date_published'].month), str(item['date_published'].day)), shell=True)
 		except mariadb.Error as error:
 			log.msg('Error: {}'.format(error), level=log.ERROR)
 		except OSError as error:
@@ -60,23 +66,6 @@ class MariaDBPipeline(object):
 		finally:
 			self.connection.close()
 			return item
-
-	def apk_exists(self, package_name, date_published):
-		"""
-		Determines whether an APK with the specified package name published on the specified date already exists in the database.
-
-		Args:
-			package_name: APK package name
-			date_published: date the APK was published
-		"""
-		self.cursor.execute('SELECT package_name, date_published FROM apk_information WHERE package_name=\'%s\' AND date_published=\'%s\'', 
-			(item['package_name'], datetime.strftime(item['date_published'], '%Y-%m-%d')))
-		apk = self.cursor.fetchone()
-
-		if apk is None:
-			return false
-		else:
-			return true
 
 	def create_or_update_crawling_session(self, item):
 		"""
