@@ -6,11 +6,10 @@ CREATE TABLE android_crawling_sessions (
 );
 
 CREATE TABLE apk_information (
-	apk_id INT NOT NULL AUTO_INCREMENT,
-	package_name VARCHAR(255),
+	package_name VARCHAR(255) NOT NULL,
 	name VARCHAR(255),
 	developer VARCHAR(255),
-	date_published DATE,
+	date_published DATE NOT NULL,
 	genre VARCHAR(255),
 	description TEXT,
 	score FLOAT,
@@ -28,27 +27,30 @@ CREATE TABLE apk_information (
 	operating_system VARCHAR(255),
 	content_rating VARCHAR(255),
 	crawling_session_id INT,
-	PRIMARY KEY (apk_id),
+	PRIMARY KEY (package_name, date_published),
 	UNIQUE (package_name, date_published),
 	FOREIGN KEY (crawling_session_id) REFERENCES android_crawling_sessions(crawling_id)
 );
 
 CREATE TABLE similar_android_apps (
-	apk_id INT,
+	package_name VARCHAR(255) NOT NULL, 
+	date_published DATE NOT NULL,
 	similar_app VARCHAR(255),
-	FOREIGN KEY (apk_id) REFERENCES apk_information(apk_id)
+	FOREIGN KEY (package_name, date_published) REFERENCES apk_information(package_name, date_published)
 );
 
 CREATE TABLE android_reviews (
 	review_id INT NOT NULL AUTO_INCREMENT,
-	apk_id INT,
+	package_name VARCHAR(255) NOT NULL, 
+	date_published DATE NOT NULL,
 	title VARCHAR(255),
 	body TEXT,
 	reviewer_id VARCHAR(255),
 	review_date DATE,
 	rating INT,
 	PRIMARY KEY (review_id),
-	FOREIGN KEY (apk_id) REFERENCES apk_information(apk_id)
+	UNIQUE (title, body, reivewer_id, review_date, rating),
+	FOREIGN KEY (package_name, date_published) REFERENCES apk_information(package_name, date_published)
 );
 
 CREATE TABLE ios_crawling_sessions (

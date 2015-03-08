@@ -9,8 +9,7 @@ from scrapy.exceptions import DropItem
 class MariaDBPipeline(object):
 
 	def __init__(self, settings):
-		# Maintain values used across multiple functions
-		self.new_apk_id = None
+		# Maintain value(s) used across multiple functions
 		self.crawling_session_id = None
 
 		# Initialize database connection
@@ -30,21 +29,27 @@ class MariaDBPipeline(object):
 			# Create a new crawling session, or update the existing one
 			self.create_or_update_crawling_session(item)
 
-			# Insert the APK information, reviews, and similar apps into the database
-			self.insert_item(item)
+			# Insert the reviews for an APK. New reviews are inserted even if the 
+			# app has not been updated since the last scraping session.
 			self.insert_reviews(item)
+		except mariadb.Error as error:
+			log.msg('Error: {}'.format(error), level=log.ERROR)
+
+		try:
+			# Insert the APK information and similar apps into the database
+			self.insert_item(item)
 			self.insert_similar_apps(item)
 
-			# Call the Bash shell script that downloads the respective APK file
+			# If a new version exists, call the Bash shell script that downloads the respective APK file
 			subprocess.call('./android_script-2.sh "%s" "%s" "%s" "%s"' % (item['package_name'], 
 				str(item['date_published'].year), str(item['date_published'].month), str(item['date_published'].day)), shell=True)
 		except mariadb.Error as error:
 			log.msg('Error: {}'.format(error), level=log.ERROR)
 		except OSError as error:
 			log.msg('Error: {}'.format(error), level=log.ERROR)
-		finally:
-			self.connection.close()
-			return item
+		
+		self.connection.close()
+		return item
 
 	# Creates a new crawling session or updates the current
 	# crawling session, if one is currently ongoing.
@@ -82,15 +87,14 @@ class MariaDBPipeline(object):
 				item['num_four_star_reviews'], item['num_five_star_reviews'], item['whats_new'], item['file_size'], item['lower_installs'],
 				item['upper_installs'], item['version'], item['operating_system'], item['content_rating'], self.crawling_session_id))
 		self.connection.commit()
-		self.new_apk_id = self.cursor.lastrowid
 		log.msg('Insert complete! %s' % item['package_name'], level=log.INFO)
 
 	# Inserts the APK's reviews into the database
 	def insert_reviews(self, item):
 		log.msg('Inserting reviews for %s into android_reviews...' % item['package_name'], level=log.INFO)
 		for review in item['reviews']:
-			self.cursor.execute('INSERT INTO android_reviews (apk_id, title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s, %s)',
-				(self.new_apk_id, review['title'], review['body'], review['reviewer_id'], review['review_date'], review['rating']))
+			self.cursor.execute('INSERT INTO android_reviews (package_name, date_published, title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+				(item['package_name'], item['date_published'], review['title'], review['body'], review['reviewer_id'], review['review_date'], review['rating']))
 		log.msg('Insert of reviews complete! %s' % item['package_name'], level=log.INFO)
 		self.connection.commit()
 
@@ -98,6 +102,7 @@ class MariaDBPipeline(object):
 	def insert_similar_apps(self, item):
 		log.msg('Inserting similar apps for %s into similar_android_apps...' % item['package_name'], level=log.INFO)
 		for similar_app in item['similar_apps']:
-			self.cursor.execute('INSERT INTO similar_android_apps (apk_id, similar_app) VALUES (%s, %s)', (self.new_apk_id, similar_app))
+			self.cursor.execute('INSERT INTO similar_android_apps (package_name, date_published, similar_app) VALUES (%s, %s, %s)', 
+				(item['package_name'], item['date_published'], similar_app))
 		log.msg('Insert of similar apps complete! %s' % item['package_name'], level=log.INFO)
 		self.connection.commit()
