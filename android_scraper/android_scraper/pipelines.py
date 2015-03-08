@@ -9,6 +9,12 @@ from scrapy.exceptions import DropItem
 class MariaDBPipeline(object):
 
 	def __init__(self, settings):
+		"""
+		Initializes the MariaDBPipeline.
+
+		Args:
+			settings: the Scrapy project settings
+		"""
 		# Maintain value(s) used across multiple functions
 		self.crawling_session_id = None
 
@@ -21,23 +27,27 @@ class MariaDBPipeline(object):
 	def from_crawler(cls, crawler):
 		return cls(crawler.settings)
 
-	# Inserts the APK, its reviews, and its similar apps into the database.
-	# If an error occurs, the item and its respective information is not
-	# inserted into the database, and the APK file is not downloaded.
 	def process_item(self, item, spider):
+		"""
+		Inserts the APK, its reviews, and its similar apps into the database.
+		If an error occurs, the item and its respective information is not
+		inserted into the database, and the APK file is not downloaded.
+
+		Args:
+			item: the ApkItem being processed
+			spider: the ApkSpider 
+		"""
 		try:
 			# Create a new crawling session, or update the existing one
 			self.create_or_update_crawling_session(item)
 
-			# Insert the reviews for an APK. New reviews are inserted even if the 
-			# app has not been updated since the last scraping session.
+		if self.apk_exists(item['package_name'], item['date_published']):
+			# If the app has not been updated since the last crawling session, only update its reviews
 			self.insert_reviews(item)
-		except mariadb.Error as error:
-			log.msg('Error: {}'.format(error), level=log.ERROR)
-
-		try:
-			# Insert the APK information and similar apps into the database
+		else:
+			# Insert the APK information, reviews, and similar apps into the database
 			self.insert_item(item)
+			self.insert_reviews(item)
 			self.insert_similar_apps(item)
 
 			# If a new version exists, call the Bash shell script that downloads the respective APK file
@@ -47,13 +57,34 @@ class MariaDBPipeline(object):
 			log.msg('Error: {}'.format(error), level=log.ERROR)
 		except OSError as error:
 			log.msg('Error: {}'.format(error), level=log.ERROR)
-		
-		self.connection.close()
-		return item
+		finally:
+			self.connection.close()
+			return item
 
-	# Creates a new crawling session or updates the current
-	# crawling session, if one is currently ongoing.
+	def apk_exists(self, package_name, date_published):
+		"""
+		Determines whether an APK with the specified package name published on the specified date already exists in the database.
+
+		Args:
+			package_name: APK package name
+			date_published: date the APK was published
+		"""
+		self.cursor.execute('SELECT package_name, date_published FROM apk_information WHERE package_name=\'%s\' AND date_published=\'%s\'', 
+			(item['package_name'], datetime.strftime(item['date_published'], '%Y-%m-%d')))
+		apk = self.cursor.fetchone()
+
+		if apk is None:
+			return false
+		else:
+			return true
+
 	def create_or_update_crawling_session(self, item):
+		"""
+		Creates a new crawling session or updates the current crawling session, if one is currently ongoing.
+
+		Args:
+			item: the ApkItem being processed
+		"""
 		self.cursor.execute('SELECT crawling_id, start_time FROM android_crawling_sessions ORDER BY start_time DESC LIMIT 1')
 		crawling_session = self.cursor.fetchone()
 
@@ -74,8 +105,13 @@ class MariaDBPipeline(object):
 			self.crawling_session_id = crawling_session[0]
 			log.msg('Update complete!', level=log.INFO)
 
-	# Inserts the APK into the database
 	def insert_item(self, item):
+		"""
+		Inserts the APK into the database.
+
+		Args:
+			item: the ApkItem being processed
+		"""
 		log.msg('Inserting %s into apk_information...' % item['package_name'], level=log.INFO)
 		self.cursor.execute('INSERT INTO apk_information (package_name, name, developer, date_published, ' +
 				'genre, description, score, num_reviews, num_one_star_reviews, num_two_star_reviews, num_three_star_reviews, ' +
@@ -89,8 +125,13 @@ class MariaDBPipeline(object):
 		self.connection.commit()
 		log.msg('Insert complete! %s' % item['package_name'], level=log.INFO)
 
-	# Inserts the APK's reviews into the database
 	def insert_reviews(self, item):
+		"""
+		Inserts the APK's reviews into the database.
+
+		Args:
+			item: the ApkItem being processed
+		"""
 		log.msg('Inserting reviews for %s into android_reviews...' % item['package_name'], level=log.INFO)
 		for review in item['reviews']:
 			self.cursor.execute('INSERT INTO android_reviews (package_name, date_published, title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s, %s, %s)',
@@ -98,8 +139,13 @@ class MariaDBPipeline(object):
 		log.msg('Insert of reviews complete! %s' % item['package_name'], level=log.INFO)
 		self.connection.commit()
 
-	# Inserts the apps similar to the APK into the database
 	def insert_similar_apps(self, item):
+		"""
+		Inserts the apps similar to the APK into the database
+
+		Args:
+			item: the ApkItem being processed
+		"""
 		log.msg('Inserting similar apps for %s into similar_android_apps...' % item['package_name'], level=log.INFO)
 		for similar_app in item['similar_apps']:
 			self.cursor.execute('INSERT INTO similar_android_apps (package_name, date_published, similar_app) VALUES (%s, %s, %s)', 
