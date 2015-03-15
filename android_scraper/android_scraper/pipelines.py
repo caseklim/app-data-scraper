@@ -42,30 +42,32 @@ class MariaDBPipeline(object):
 			self.create_or_update_crawling_session(item)
 
 			# Determine whether an APK with the specified package name published on the specified date already exists in the database
-			date_published datetime.strftime(item['date_published'], '%Y-%m-%d')
-			self.cursor.execute('SELECT package_name, date_published FROM apk_information WHERE package_name="%s" AND date_published="%s"', 
+			# Note: Improper practice to use the % operator with SQL queries, but practice way was always returning None
+			self.cursor.execute('SELECT package_name, date_published FROM apk_information WHERE package_name="%s" AND date_published="%s"' %
 				(item['package_name'], datetime.strftime(item['date_published'], '%Y-%m-%d')))
 			apk = self.cursor.fetchone()
 
 			if apk is None:
-				# Insert the APK information, reviews, and similar apps into the database
+				# For a new APK or new version of an APK, insert the APK information, reviews, and similar apps into the database
 				self.insert_item(item)
 				self.insert_reviews(item)
 				self.insert_similar_apps(item)
-			else:
-				# If the app has not been updated since the last crawling session, only update its reviews
-				self.insert_reviews(item)
 
-				# If a new version exists, call the Bash shell script that downloads the respective APK file
+				# Call the Bash shell script that downloads the respective APK file
 				subprocess.call('./android_script-2.sh "%s" "%s" "%s" "%s"' % (item['package_name'], 
 					str(item['date_published'].year), str(item['date_published'].month), str(item['date_published'].day)), shell=True)
+			else:
+				# If a new version of the app has not been released since the last crawling session, only update its reviews
+				self.insert_reviews(item)
 		except mariadb.Error as error:
+			# An error occurred with the database
 			log.msg('Error: {}'.format(error), level=log.ERROR)
 		except OSError as error:
+			# An error occurred downloading the APK file
 			log.msg('Error: {}'.format(error), level=log.ERROR)
-		finally:
-			self.connection.close()
-			return item
+
+		self.connection.close()
+		return item
 
 	def create_or_update_crawling_session(self, item):
 		"""
@@ -123,8 +125,12 @@ class MariaDBPipeline(object):
 		"""
 		log.msg('Inserting reviews for %s into android_reviews...' % item['package_name'], level=log.INFO)
 		for review in item['reviews']:
-			self.cursor.execute('INSERT INTO android_reviews (package_name, date_published, title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s, %s, %s)',
-				(item['package_name'], item['date_published'], review['title'], review['body'], review['reviewer_id'], review['review_date'], review['rating']))
+			# Catch the error here to avoid insertion of duplicate reviews, but to allow the insertion of new reviews
+			try:
+				self.cursor.execute('INSERT INTO android_reviews (package_name, date_published, title, body, reviewer_id, review_date, rating) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+					(item['package_name'], item['date_published'], review['title'], review['body'], review['reviewer_id'], review['review_date'], review['rating']))
+			except mariadb.Error as error:
+				log.msg('Error: {}'.format(error), level=log.ERROR)
 		log.msg('Insert of reviews complete! %s' % item['package_name'], level=log.INFO)
 		self.connection.commit()
 
