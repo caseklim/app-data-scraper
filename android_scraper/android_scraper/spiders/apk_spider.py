@@ -88,17 +88,24 @@ class ApkSpider(CrawlSpider):
 			# Reviews may not have a title. If so, set the review title to None.
 			review_title = None
 			try:
-				review_title = review.xpath('//span[@class="review-title"]/text()').extract()[i]
+				review_title = review.xpath('./div[@class="review-body"]/span[@class="review-title"]/text()').extract()[0]
 			except:
 				pass
 
-			review_date = review.xpath('//span[@class="review-date"]/text()').extract()[i]
-			review_rating = review.xpath('//div[@class="review-info-star-rating"]//div[1]/@aria-label').extract()[i].strip()
+			# Reviews may not have a body. If so, set the review body to None.
+			review_body = None
+			try:
+				review_body = review.xpath('./div[@class="review-body"]/text()[normalize-space()]').extract()[0].strip()
+			except:
+				pass
+
+			review_date = review.xpath('./div[@class="review-header"]/div[@class="review-info"]/span[@class="review-date"]/text()').extract()[0]
+			review_rating = review.xpath('./div[@class="review-header"]/div[@class="review-info"]/div[@class="review-info-star-rating"]//div[1]/@aria-label').extract()[0].strip()
 			item['reviews'].append({
 				'reviewer_id': int(author[author.find('id=') + 3:]) if author.find('id=') > -1 else None,
 				'rating': re.search('Rated (.+?) stars out of five stars', review_rating).group(1),
 				'title': review_title,
-				'body': review.xpath('//div[@class="review-body"]/text()[normalize-space(.)]').extract()[i].strip(),
+				'body': review_body,
 				'review_date': datetime.strptime(review_date, '%B %d, %Y')
 			})
 
