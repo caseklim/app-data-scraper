@@ -8,8 +8,7 @@ from scrapy.exceptions import DropItem
 class MariaDBPipeline(object):
 
 	def __init__(self, settings):
-		# Maintain values used across multiple functions
-		self.new_ios_id = None
+		# Maintain value(s) used across multiple functions
 		self.crawling_session_id = None
 
 		# Initialize database connection
@@ -29,14 +28,24 @@ class MariaDBPipeline(object):
 			# Create a new crawling session, or update the existing one
 			self.create_or_update_crawling_session(item)
 
-			# Insert the app information and reviews into the database
-			self.insert_item(item)
-			self.insert_reviews(item)
+			# Determine whether an app with the specified ID published on the specified date already exists in the database
+			# Note: Improper practice to use the % operator with SQL queries, but practice way was always returning None
+			self.cursor.execute('SELECT id, updated_date FROM ios_app_information WHERE id="%s" AND updated_date="%s"' %
+				(item['id'], datetime.strftime(item['updated_date'], '%Y-%m-%d')))
+			app = self.cursor.fetchone()
+
+			if app is None:
+				# For a new app or new version of an app, insert the app information and reviews into the database
+				self.insert_item(item)
+				self.insert_reviews(item)
+			else:
+				# If a new version of the app has not been released since the last crawling session, only update its reviews
+				self.insert_reviews(item)
 		except mariadb.Error as error:
 			log.msg('Error: {}'.format(error), level=log.ERROR)
-		finally:
-			self.connection.close()
-			return item
+
+		self.connection.close()
+		return item
 
 	# Creates a new crawling session or updates the current
 	# crawling session, if one is currently ongoing.
@@ -74,14 +83,17 @@ class MariaDBPipeline(object):
 				item['file_size'], item['content_advisory_rating'], item['rating_current_version'], item['num_ratings_current_version'],
 				item['rating_all_versions'], item['num_ratings_all_versions'], item['minimum_os_version'], self.crawling_session_id))
 		self.connection.commit()
-		self.new_ios_id = self.cursor.lastrowid
 		log.msg('Insert complete! %s' % item['id'], level=log.INFO)
 
 	# Inserts the app's reviews into the database
 	def insert_reviews(self, item):
 		log.msg('Inserting reviews for %s into ios_reviews...' % item['id'], level=log.INFO)
 		for review in item['customer_reviews']:
-			self.cursor.execute('INSERT INTO ios_reviews (app_id, topic, rating, user, review, version) VALUES (%s, %s, %s, %s, %s, %s)',
-				(self.new_apk_id, review['topic'], review['rating'], review['user'], review['review'], review['version']))
+			# Catch the error here to avoid insertion of duplicate reviews, but to allow the insertion of new reviews
+			try:
+				self.cursor.execute('INSERT INTO ios_reviews (app_id, updated_date, topic, rating, user, review, version) VALUES (%s, %s, %s, %s, %s, %s, %s)',
+					(item['id'], item['updated_date'], review['topic'], review['rating'], review['user'], review['review'], review['version']))
+			except mariadb.Error as error:
+				log.msg('Error: {}'.format(error), level=log.ERROR)
 		log.msg('Insert of reviews complete! %s' % item['id'], level=log.INFO)
 		self.connection.commit()

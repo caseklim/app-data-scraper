@@ -61,7 +61,6 @@ CREATE TABLE ios_crawling_sessions (
 );
 
 CREATE TABLE ios_app_information (
-	app_id INT NOT NULL AUTO_INCREMENT,
 	id INT,
 	bundle_id VARCHAR(255),
 	name VARCHAR(255),
@@ -81,19 +80,21 @@ CREATE TABLE ios_app_information (
 	num_ratings_all_versions INT,
 	minimum_os_version FLOAT,
 	crawling_session_id INT,
-	PRIMARY KEY(app_id),
-	UNIQUE (bundle_id, updated_date),
+	PRIMARY KEY (id, updated_date),
+	UNIQUE (id, updated_date),
 	FOREIGN KEY (crawling_session_id) REFERENCES ios_crawling_sessions(crawling_id)
 );
 
 CREATE TABLE ios_reviews (
 	review_id INT NOT NULL AUTO_INCREMENT,
 	app_id INT,
+	updated_date DATE,
 	topic VARCHAR(255),
 	rating INT,
 	user VARCHAR(255),
 	review TEXT,
 	version VARCHAR(255),
 	PRIMARY KEY (review_id),
-	FOREIGN KEY (app_id) REFERENCES ios_app_information(app_id)
+	UNIQUE (topic, rating, user, version),
+	FOREIGN KEY (app_id, updated_date) REFERENCES ios_app_information(id, updated_date)
 );
