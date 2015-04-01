@@ -43,7 +43,16 @@ The file pipelines.py uses the MariaDB database to determine whether information
 ##2.3 Shell Scripts
 Inside this project, there are two script files: android\_script.sh and android_script-2.sh.
 
-###2.3.1 android_script.sh
+###2.3.1 run_script.sh
+This script was written in place of a cron job to have the Android scraper run indefinitely until manually stopped. It seems as though cron jobs cannot run in an infinite loop, which is why this script was created instead.
+
+The process ID of the current execution of this script can be found in pid.txt. In order to stop the current execution, use the following command:
+
+```kill -SIGUSR1 pid```
+
+Where ```pid``` is the process ID of the script.
+
+###2.3.2 android_script.sh
 This file is the "master" script used to start the scraper. This script is used as follows:
 
 ```./android_script.sh apk_list.txt```
@@ -52,7 +61,7 @@ Where apk_list.txt is a text file containing a list of Android package names.
 
 For each package name in the file, the script executes ```ApkSpider``` with that package name.
 
-###2.3.2 android_script-2.sh
+###2.3.3 android_script-2.sh
 This script is called from within pipelines.py, after the app information has been inserted into the MariaDB database.
 
 The Google Play API is used to first download the respective APK file, and the script then moves and renames that file.
